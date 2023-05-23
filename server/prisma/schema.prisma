@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Item {
+  id                 String     @id @default(uuid()) @map("_id")
+  name               String
+  categories         Category[]
+  description        String
+  imageUrls          String //[]
+  price              Float
+  hasDiscount        Boolean
+  discountPercentage String?
+  discountValue      Float?
+  discountedValue    Float?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  quantity           Int
+}
+
+model Category {
+  id        String   @id @default(uuid()) @map("_id")
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  item      Item[]
+}

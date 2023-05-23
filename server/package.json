@@ -1,0 +1,29 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "lint": "eslint src --ext .ts --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^4.14.1",
+    "fastify": "^4.17.0",
+    "firebase-admin": "^11.8.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@fastify/cors": "^8.2.1",
+    "@rocketseat/eslint-config": "^1.2.0",
+    "@types/node": "^20.2.3",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
+    "eslint": "^8.41.0",
+    "prisma": "^4.14.1",
+    "tsx": "^3.12.7",
+    "typescript": "^5.0.4"
+  }
+}
