@@ -15,7 +15,7 @@ model Item {
   name               String
   categories         Category[]
   description        String
-  imageUrls          String //[]
+  images             Image[]
   price              Float
   hasDiscount        Boolean
   discountPercentage String?
@@ -32,4 +32,12 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   item      Item[]
+}
+
+model Image {
+  id        String   @id @default(uuid()) @map("_id")
+  imageUrl  String
+  createdAt DateTime @default(now())
+  Item      Item?    @relation(fields: [itemId], references: [id])
+  itemId    String?
 }

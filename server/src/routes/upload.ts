@@ -49,6 +49,8 @@ export async function uploadRoute(app: FastifyInstance) {
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
         reply.send({
           message: "Imagem enviada com sucesso",
+          id: fileId,
+          fileName,
           imageUrl: publicUrl,
         });
       } catch (error) {
