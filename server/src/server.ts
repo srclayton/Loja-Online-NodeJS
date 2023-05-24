@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 
 import { itemsRoute } from "./routes/items";
 import { categoriesRoute } from "./routes/category";
@@ -9,6 +10,7 @@ const server = fastify();
 server.register(cors, {
   origin: true,
 });
+server.register(multipart);
 server.register(uploadRoute);
 server.register(itemsRoute);
 server.register(categoriesRoute);
