@@ -5,6 +5,7 @@ import multipart from "@fastify/multipart";
 import { itemsRoute } from "./routes/items";
 import { categoriesRoute } from "./routes/category";
 import { uploadRoute } from "./routes/upload";
+import { imagesRoute } from "./routes/images";
 
 const server = fastify();
 server.register(cors, {
@@ -14,6 +15,7 @@ server.register(multipart);
 server.register(uploadRoute);
 server.register(itemsRoute);
 server.register(categoriesRoute);
+server.register(imagesRoute);
 
 server.listen({ port: 8080 }, (err, address) => {
   if (err) {

@@ -4,6 +4,7 @@ import admin from "firebase-admin";
 import * as serviceAccount from "../config/my-first-project-66dfc-firebase-adminsdk-28p20-122ae4d4f2.json";
 import { randomUUID } from "crypto";
 import { extname } from "path";
+import { z } from "zod";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
@@ -46,16 +47,43 @@ export async function uploadRoute(app: FastifyInstance) {
           },
         });
 
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+        const [files] = await bucket.getFiles();
+        const file = files.find((file) => file.name === fileName);
+        // @ts-ignore
+        const [signedUrl] = await file.getSignedUrl({
+          action: "read",
+          expires: "01-01-2124", // Data de expiração opcional
+        });
         reply.send({
           message: "Imagem enviada com sucesso",
           id: fileId,
-          fileName,
-          imageUrl: publicUrl,
+          name: fileName,
+          contentType: data[0]?.mimetype,
+          imageUrl: signedUrl,
         });
       } catch (error) {
         reply.code(500).send({ message: "Erro ao enviar a imagem", error });
       }
+    }
+  );
+  app.delete(
+    "/api/v1/upload/:id",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const paramsSchema = z.object({
+        id: z.string().uuid(),
+      });
+      const bodySchema = z.object({
+        contentType: z.string(),
+      });
+      const { id } = paramsSchema.parse(request.params);
+      const { contentType } = bodySchema.parse(request.body);
+      const extension = ".".concat(contentType.split("/")[1]);
+      const [files] = await bucket.getFiles();
+      const file = files.find((file) => file.name === id.concat(extension));
+      // reply.send(file);
+      // @ts-ignore
+      const deletedImage = await file?.delete();
+      reply.send(deletedImage);
     }
   );
 }

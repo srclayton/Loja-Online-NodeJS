@@ -31,7 +31,12 @@ export async function itemsRoute(app: FastifyInstance) {
         images: true,
       },
     });
-    res.send(items);
+    if (!items)
+      res.status(404).send({
+        statusCode: "404",
+        error: "Item not found",
+      });
+    res.status(200).send(items);
   });
 
   app.get("/api/v1/items/:id", async (req, res) => {
@@ -49,12 +54,12 @@ export async function itemsRoute(app: FastifyInstance) {
         images: true,
       },
     });
-    if (item) res.send(item);
-    else
+    if (!item)
       res.status(404).send({
         statusCode: "404",
         error: "Item not found",
       });
+    res.status(200).send(item);
   });
 
   app.post("/api/v1/items", async (req, res) => {
@@ -72,17 +77,17 @@ export async function itemsRoute(app: FastifyInstance) {
       discountedValue,
       quantity,
     } = iBodySchema.parse(req.body);
-
-    let categories: string | undefined;
-
-    if (categoriesId.length === 1) {
-      [categories] = categoriesId;
-    }
+    const categoriesSchema: any = [];
+    categoriesId.forEach((element) => {
+      categoriesSchema.push({ id: element });
+    });
 
     const item = await prisma.item.create({
       data: {
         name,
-        categories: categories ? { connect: { id: categories } } : undefined,
+        categories: {
+          connect: categoriesSchema,
+        },
         description,
         images: { connect: { id: image } },
         price,
@@ -97,27 +102,7 @@ export async function itemsRoute(app: FastifyInstance) {
         images: true,
       },
     });
-    if (!categories) {
-      let newCategory;
-      for (const element of categoriesId) {
-        newCategory = await prisma.item.update({
-          where: {
-            id: item.id,
-          },
-          data: {
-            categories: {
-              connect: { id: element },
-            },
-          },
-          include: {
-            categories: true,
-            images: true,
-          },
-        });
-      }
-      res.send(newCategory);
-    }
-    res.send(item);
+    res.status(201).send(item);
   });
 
   app.delete("/api/v1/items/:id", async (req, res) => {
@@ -143,57 +128,67 @@ export async function itemsRoute(app: FastifyInstance) {
     });
     res.send(item);
   });
-  // TODO corrigir update
-  // app.put("/api/v1/items/:id", async (req, res) => {
-  //   const paramsSchema = z.object({
-  //     id: z.string().uuid(),
-  //   });
-  //   const { id } = paramsSchema.parse(req.params);
 
-  //   const item = await prisma.item.findUnique({
-  //     where: {
-  //       id,
-  //     },
-  //   });
+  app.put("/api/v1/items/:id", async (req, res) => {
+    const paramsSchema = z.object({
+      id: z.string().uuid(),
+    });
+    const { id } = paramsSchema.parse(req.params);
 
-  //   if (!item)
-  //     res.status(404).send({
-  //       statusCode: "404",
-  //       error: "Item not found",
-  //     });
+    const item = await prisma.item.findUnique({
+      where: {
+        id,
+      },
+    });
 
-  //   const iBodySchema = bodySchema();
-  //   const {
-  //     name,
-  //     category,
-  //     description,
-  //     image,
-  //     price,
-  //     hasDiscount,
-  //     discountPercentage,
-  //     discountValue,
-  //     discountedValue,
-  //     quantity,
-  //   } = iBodySchema.parse(req.body);
+    if (!item)
+      res.status(404).send({
+        statusCode: "404",
+        error: "Item not found",
+      });
 
-  //   const updatedItem = await prisma.item.update({
-  //     where: {
-  //       id,
-  //     },
-  //     data: {
-  //       name, // @ts-ignore
-  //       categories: category,
-  //       description,
-  //       image,
-  //       price,
-  //       hasDiscount, // @ts-ignore
-  //       discountPercentage, // @ts-ignore
-  //       discountValue, // @ts-ignore
-  //       discountedValue,
-  //       quantity,
-  //     },
-  //   });
+    const iBodySchema = bodySchema();
+    const {
+      name,
+      categoriesId,
+      description,
+      image,
+      price,
+      hasDiscount,
+      discountPercentage,
+      discountValue,
+      discountedValue,
+      quantity,
+    } = iBodySchema.parse(req.body);
+    const categoriesSchema: any = [];
+    categoriesId.forEach((element) => {
+      categoriesSchema.push({ id: element });
+    });
+    console.log(categoriesId);
+    const updatedItem = await prisma.item.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        categories: {
+          set: categoriesSchema,
+        },
+        description,
+        images: { connect: { id: image } },
+        price,
+        hasDiscount,
+        discountPercentage,
+        discountValue,
+        discountedValue,
+        quantity,
+      },
+      include: {
+        categories: true,
+        images: true,
+      },
+    });
 
-  //   res.send(updatedItem);
-  // });
+    res.status(200).send(updatedItem);
+  });
 }

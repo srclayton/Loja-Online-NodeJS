@@ -35,9 +35,11 @@ model Category {
 }
 
 model Image {
-  id        String   @id @default(uuid()) @map("_id")
-  imageUrl  String
-  createdAt DateTime @default(now())
-  Item      Item?    @relation(fields: [itemId], references: [id])
-  itemId    String?
+  id          String   @id @default(uuid()) @map("_id")
+  name        String?
+  contentType String?
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  Item        Item?    @relation(fields: [itemId], references: [id])
+  itemId      String?
 }
