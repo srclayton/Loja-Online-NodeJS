@@ -9,7 +9,7 @@ function bodySchema() {
     name: z.string(),
     categoriesId: z.array(z.string()),
     description: z.string(),
-    image: z.string(),
+    image: z.array(z.string()),
     price: z.number(),
     hasDiscount: z.boolean().default(false),
     discountPercentage: z.string().nullable(),
@@ -81,6 +81,10 @@ export async function itemsRoute(app: FastifyInstance) {
     categoriesId.forEach((element) => {
       categoriesSchema.push({ id: element });
     });
+    const imageSchema: any = [];
+    image.forEach((element) => {
+      imageSchema.push({ id: element });
+    });
 
     const item = await prisma.item.create({
       data: {
@@ -89,7 +93,7 @@ export async function itemsRoute(app: FastifyInstance) {
           connect: categoriesSchema,
         },
         description,
-        images: { connect: { id: image } },
+        images: { connect: imageSchema },
         price,
         hasDiscount,
         discountPercentage,
@@ -164,7 +168,10 @@ export async function itemsRoute(app: FastifyInstance) {
     categoriesId.forEach((element) => {
       categoriesSchema.push({ id: element });
     });
-    console.log(categoriesId);
+    const imageSchema: any = [];
+    image.forEach((element) => {
+      imageSchema.push({ id: element });
+    });
     const updatedItem = await prisma.item.update({
       where: {
         id,
@@ -175,7 +182,7 @@ export async function itemsRoute(app: FastifyInstance) {
           set: categoriesSchema,
         },
         description,
-        images: { connect: { id: image } },
+        images: { set: imageSchema },
         price,
         hasDiscount,
         discountPercentage,

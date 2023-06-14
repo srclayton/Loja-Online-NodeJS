@@ -8,7 +8,7 @@ import { z } from "zod";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-  storageBucket: "gs://my-first-project-66dfc.appspot.com/",
+  storageBucket: process.env.STORAGE_BUCKET,
 });
 const bucket = admin.storage().bucket();
 
@@ -22,12 +22,9 @@ export async function uploadRoute(app: FastifyInstance) {
             fileSize: 1024 * 1024 * 5, // 5MB
           },
         });
-
         if (!data) return reply.status(400).send();
-
         const mimeTypeRegex = /(image)\/[a-zA-Z]+/;
         const isValidesFileFormat = mimeTypeRegex.test(data[0].mimetype);
-
         if (!isValidesFileFormat)
           return reply.status(400).send({
             statusCode: "400",
@@ -35,7 +32,6 @@ export async function uploadRoute(app: FastifyInstance) {
             mimeType: data[0].mimetype,
           });
         const filePath = data[0]?.filepath;
-
         const fileId = randomUUID();
         const extension = extname(data[0]?.filename);
         const fileName = fileId.concat(extension);
@@ -46,7 +42,6 @@ export async function uploadRoute(app: FastifyInstance) {
             contentType: data[0]?.mimetype,
           },
         });
-
         const [files] = await bucket.getFiles();
         const file = files.find((file) => file.name === fileName);
         // @ts-ignore
